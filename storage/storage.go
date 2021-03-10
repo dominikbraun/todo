@@ -21,9 +21,10 @@ type ToDoFilter func(toDo model.ToDo) bool
 // Storage represents a storage backend. This may be an in-memory storage,
 // a relational database or a simple key-value store.
 type Storage interface {
-	CreateTodo(toDo model.ToDo) error
+	Install() error
+	CreateTodo(toDo model.ToDo) (model.ToDo, error)
 	FindToDos(filter ToDoFilter) ([]model.ToDo, error)
-	FindToDoById(id int) (model.ToDo, error)
-	UpdateToDo(toDo model.ToDo) error
-	DeleteToDo(toDo model.ToDo) error
+	FindToDoById(id int64) (model.ToDo, error)
+	UpdateToDo(id int64, toDo model.ToDo) (model.ToDo, error)
+	DeleteToDo(id int64) error
 }

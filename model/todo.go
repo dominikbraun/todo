@@ -4,7 +4,7 @@ package model
 
 // ToDo represents a ToDo item, typically consisting of multiple sub-tasks.
 type ToDo struct {
-	ID          int    `json:"id"`
+	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
 	Tasks       []Task `json:"tasks,omitempty"`
@@ -12,7 +12,7 @@ type ToDo struct {
 
 // Task represents a sub-task that is part of a ToDo item.
 type Task struct {
-	ID          int    `json:"id"`
+	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
 }
