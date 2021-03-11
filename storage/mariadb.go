@@ -132,7 +132,7 @@ func (m *mariaDB) FindToDoByID(id int64) (model.ToDo, error) {
 	return toDo, nil
 }
 
-func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) (model.ToDo, error) {
+func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 	sql, args, _ := sq.
 		Delete("tasks").
 		Where(sq.Eq{"todo_id": id}).
@@ -140,7 +140,7 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) (model.ToDo, error) {
 
 	_, err := m.db.Exec(sql, args...)
 	if err != nil {
-		return model.ToDo{}, err
+		return err
 	}
 
 	var newTasks []model.Task
@@ -148,7 +148,7 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) (model.ToDo, error) {
 	for _, t := range toDo.Tasks {
 		task, err := m.createTaskForToDo(id, t)
 		if err != nil {
-			return model.ToDo{}, err
+			return err
 		}
 		newTasks = append(newTasks, task)
 	}
@@ -162,13 +162,13 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) (model.ToDo, error) {
 
 	_, err = m.db.Exec(sql, args...)
 	if err != nil {
-		return model.ToDo{}, err
+		return err
 	}
 
 	toDo.ID = id
 	toDo.Tasks = newTasks
 
-	return toDo, nil
+	return nil
 }
 
 func (m *mariaDB) DeleteToDo(id int64) error {

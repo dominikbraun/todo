@@ -112,7 +112,7 @@ func (r *RESTController) UpdateToDo() http.HandlerFunc {
 			return
 		}
 
-		updatedToDo, err := r.app.UpdateToDo(int64(id), toDo)
+		err = r.app.UpdateToDo(int64(id), toDo)
 		if err != nil {
 			status := http.StatusInternalServerError
 			if errors.Is(err, todo.ErrToDoNotFound) {
@@ -122,7 +122,7 @@ func (r *RESTController) UpdateToDo() http.HandlerFunc {
 			return
 		}
 
-		respond(writer, request, http.StatusOK, updatedToDo)
+		respond(writer, request, http.StatusOK, nil)
 	}
 }
 

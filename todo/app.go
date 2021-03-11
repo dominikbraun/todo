@@ -56,16 +56,16 @@ func (a *App) GetToDo(id int64) (model.ToDo, error) {
 // UpdateToDo updates a ToDo item by replacing the stored item with the given ID
 // with the provided item. Depending on the underlying storage, the IDs of the
 // ToDo's sub-tasks may change.
-func (a *App) UpdateToDo(id int64, toDo model.ToDo) (model.ToDo, error) {
-	toDo, err := a.storage.UpdateToDo(id, toDo)
+func (a *App) UpdateToDo(id int64, toDo model.ToDo) error {
+	err := a.storage.UpdateToDo(id, toDo)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return model.ToDo{}, ErrToDoNotFound
+		return ErrToDoNotFound
 	} else if err != nil {
-		return model.ToDo{}, err
+		return err
 	}
 
-	return toDo, nil
+	return nil
 }
 
 // DeleteToDo deletes the ToDo item with the given ID along with its sub-tasks.

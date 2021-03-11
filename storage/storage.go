@@ -27,7 +27,7 @@ type Storage interface {
 
 	// UpdateToDo overwrites the ToDo item with the given ID. In case the item
 	// cannot be found, an error will be returned.
-	UpdateToDo(id int64, toDo model.ToDo) (model.ToDo, error)
+	UpdateToDo(id int64, toDo model.ToDo) error
 
 	// DeleteToDo deletes the ToDo item with the given ID. In case the item
 	// cannot be found, an error will be returned.
