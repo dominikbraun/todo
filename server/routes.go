@@ -1,3 +1,5 @@
+// Package server provides an easy-to-use HTTP server that exposes a REST API
+// and serves the ToDo application.
 package server
 
 import (
@@ -5,6 +7,10 @@ import (
 	"github.com/go-chi/chi/middleware"
 )
 
+// initializeRouter initializes the chi.Router instance, mounts all supported
+// routes and registers the REST controller's methods as handler functions.
+//
+// Also, initializeRouter registers any middleware to be used by the router.
 func (s *Server) initializeRouter() {
 	s.router = chi.NewRouter()
 
