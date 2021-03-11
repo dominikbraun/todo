@@ -5,6 +5,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -28,9 +29,11 @@ type Server struct {
 
 // New creates a new HTTP server. The given app instance will be used by the
 // REST controller in order to handle requests.
-func New(app *todo.App) *Server {
+func New(port uint, app *todo.App) *Server {
+	address := fmt.Sprintf(":%v", port)
+
 	server := &Server{
-		internal:   &http.Server{},
+		internal:   &http.Server{Addr: address},
 		controller: controller.NewRESTController(app),
 	}
 
@@ -40,8 +43,8 @@ func New(app *todo.App) *Server {
 	return server
 }
 
-// Run starts the server, listening on the configured address. Can be stopped
-// by sending an interrupt signal, e.g. by pressing Ctrl + C.
+// Run starts the server, listening on the configured address. Can be stopped by
+// sending an interrupt signal, e.g. by pressing Ctrl + C.
 func (s *Server) Run() error {
 	shutdown := make(chan os.Signal)
 	signal.Notify(shutdown, os.Interrupt)
