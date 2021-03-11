@@ -7,8 +7,8 @@ import "github.com/dominikbraun/todo/model"
 // Storage represents a storage backend.
 type Storage interface {
 
-	// Install initializes the storage so that calls to the other functions
-	// like CreateToDo are safe to perform.
+	// Install initializes the storage so that calls to the other functions like
+	// CreateToDo are safe to perform.
 	//
 	// For example, a MongoDB backend should create the required buckets to
 	// store ToDo items, while a MariaDB backend should create the corresponding

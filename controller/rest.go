@@ -34,8 +34,8 @@ func NewRESTController(app *todo.App) *RESTController {
 	}
 }
 
-// CreateToDo processes a POST request for creating a ToDo item. It expects
-// a ToDo item without ID and returns an item containing the ID.
+// CreateToDo processes a POST request for creating a ToDo item. It expects a
+// ToDo item without ID and returns an item containing the ID.
 func (r *RESTController) CreateToDo() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		var toDo model.ToDo
@@ -93,8 +93,8 @@ func (r *RESTController) GetToDo() http.HandlerFunc {
 	}
 }
 
-// UpdateToDo processes a PUT request for updating a ToDo item. The item
-// with the given ID will be overridden by the item in the request body.
+// UpdateToDo processes a PUT request for updating a ToDo item. The item with
+// the given ID will be overridden by the item in the request body.
 //
 // Expects the `id` URL parameter.
 func (r *RESTController) UpdateToDo() http.HandlerFunc {
@@ -126,8 +126,8 @@ func (r *RESTController) UpdateToDo() http.HandlerFunc {
 	}
 }
 
-// DeleteToDo processes a DELETE request for deleting a single ToDo item.
-// Deleting an item will also delete all of its sub-tasks.
+// DeleteToDo processes a DELETE request for deleting a single ToDo item. This
+// will also delete all of the item's sub-tasks.
 //
 // Expects the `id` URL parameter.
 func (r *RESTController) DeleteToDo() http.HandlerFunc {
