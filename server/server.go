@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/dominikbraun/todo/todo"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dominikbraun/todo/controller"
+	"github.com/dominikbraun/todo/todo"
 
 	"github.com/go-chi/chi"
 )
@@ -18,13 +18,13 @@ import (
 type Server struct {
 	router     chi.Router
 	internal   *http.Server
-	controller *controller.REST
+	controller *controller.RESTController
 }
 
-func New() *Server {
+func New(app *todo.App) *Server {
 	server := &Server{
 		internal:   &http.Server{},
-		controller: controller.NewRESTController(todo.New()),
+		controller: controller.NewRESTController(app),
 	}
 
 	server.initializeRouter()

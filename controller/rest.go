@@ -1,3 +1,5 @@
+// Package controller provides application controllers that convert incoming
+// data to domain models, run business logic on them and return the results.
 package controller
 
 import (
@@ -13,28 +15,39 @@ import (
 	"github.com/go-chi/render"
 )
 
-type REST struct {
+// ErrorResponse will be returned by the REST API in case an error occurred.
+type ErrorResponse struct {
+	Error error `json:"error"`
+}
+
+// RESTController represents a controller capable of handling incoming HTTP
+// requests and yielding a corresponding JSON result.
+type RESTController struct {
 	app *todo.App
 }
 
-func NewRESTController(app *todo.App) *REST {
-	return &REST{
+// NewRESTController returns a new REST controller instance that will use the
+// provided app instance for triggering business logic.
+func NewRESTController(app *todo.App) *RESTController {
+	return &RESTController{
 		app: app,
 	}
 }
 
-func (r *REST) CreateToDo() http.HandlerFunc {
+// CreateToDo processes a POST request for creating a ToDo item. It expects
+// a ToDo item without ID and returns an item containing the ID.
+func (r *RESTController) CreateToDo() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		var toDo model.ToDo
 
 		if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
-			respondErr(writer, request, http.StatusUnprocessableEntity, err)
+			respond(writer, request, http.StatusUnprocessableEntity, err)
 			return
 		}
 
 		createdToDo, err := r.app.CreateToDo(toDo)
 		if err != nil {
-			respondErr(writer, request, http.StatusInternalServerError, err)
+			respond(writer, request, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -42,11 +55,12 @@ func (r *REST) CreateToDo() http.HandlerFunc {
 	}
 }
 
-func (r *REST) GetToDos() http.HandlerFunc {
+// GetToDos processes a GET request for listing all ToDo items.
+func (r *RESTController) GetToDos() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		toDos, err := r.app.GetToDos()
 		if err != nil {
-			respondErr(writer, request, http.StatusInternalServerError, err)
+			respond(writer, request, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -54,21 +68,24 @@ func (r *REST) GetToDos() http.HandlerFunc {
 	}
 }
 
-func (r *REST) GetToDo() http.HandlerFunc {
+// GetToDo processes a GET request for retrieving a single ToDo item by ID.
+//
+// Expects the `id` URL parameter.
+func (r *RESTController) GetToDo() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(request, "id"))
 		if err != nil {
-			respondErr(writer, request, http.StatusBadRequest, err)
+			respond(writer, request, http.StatusBadRequest, err)
 			return
 		}
 
-		toDo, err := r.app.GetToDo(id)
+		toDo, err := r.app.GetToDo(int64(id))
 		if err != nil {
 			status := http.StatusInternalServerError
 			if errors.Is(err, todo.ErrToDoNotFound) {
 				status = http.StatusNotFound
 			}
-			respondErr(writer, request, status, err)
+			respond(writer, request, status, err)
 			return
 		}
 
@@ -76,28 +93,32 @@ func (r *REST) GetToDo() http.HandlerFunc {
 	}
 }
 
-func (r *REST) UpdateToDo() http.HandlerFunc {
+// UpdateToDo processes a PUT request for updating a ToDo item. The item
+// with the given ID will be overridden by the item in the request body.
+//
+// Expects the `id` URL parameter.
+func (r *RESTController) UpdateToDo() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(request, "id"))
 		if err != nil {
-			respondErr(writer, request, http.StatusBadRequest, err)
+			respond(writer, request, http.StatusBadRequest, err)
 			return
 		}
 
 		var toDo model.ToDo
 
 		if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
-			respondErr(writer, request, http.StatusUnprocessableEntity, err)
+			respond(writer, request, http.StatusUnprocessableEntity, err)
 			return
 		}
 
-		updatedToDo, err := r.app.UpdateToDo(id, toDo)
+		updatedToDo, err := r.app.UpdateToDo(int64(id), toDo)
 		if err != nil {
 			status := http.StatusInternalServerError
 			if errors.Is(err, todo.ErrToDoNotFound) {
 				status = http.StatusNotFound
 			}
-			respondErr(writer, request, status, err)
+			respond(writer, request, status, err)
 			return
 		}
 
@@ -105,20 +126,24 @@ func (r *REST) UpdateToDo() http.HandlerFunc {
 	}
 }
 
-func (r *REST) DeleteToDo() http.HandlerFunc {
+// DeleteToDo processes a DELETE request for deleting a single ToDo item.
+// Deleting an item will also delete all of its sub-tasks.
+//
+// Expects the `id` URL parameter.
+func (r *RESTController) DeleteToDo() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(request, "id"))
 		if err != nil {
-			respondErr(writer, request, http.StatusBadRequest, err)
+			respond(writer, request, http.StatusBadRequest, err)
 			return
 		}
 
-		if err := r.app.DeleteToDo(id); err != nil {
+		if err := r.app.DeleteToDo(int64(id)); err != nil {
 			status := http.StatusInternalServerError
 			if errors.Is(err, todo.ErrToDoNotFound) {
 				status = http.StatusNotFound
 			}
-			respondErr(writer, request, status, err)
+			respond(writer, request, status, err)
 			return
 		}
 
@@ -126,14 +151,17 @@ func (r *REST) DeleteToDo() http.HandlerFunc {
 	}
 }
 
-func respondErr(writer http.ResponseWriter, request *http.Request, status int, err error) {
-	type body struct {
-		Error error `json:"error"`
-	}
-	respond(writer, request, status, body{err})
-}
+// respond renders an HTTP response with the given status code and content.
 
+// respond won't dispatch the response. In case the content is an error value,
+// it will automatically be wrapped in an ErrorResponse instance.
 func respond(writer http.ResponseWriter, request *http.Request, status int, v interface{}) {
+	content := v
+
+	if err, isError := v.(error); isError {
+		content = ErrorResponse{Error: err}
+	}
+
 	render.Status(request, status)
-	render.JSON(writer, request, v)
+	render.JSON(writer, request, content)
 }
