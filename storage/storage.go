@@ -2,18 +2,26 @@
 // well as a default implementation for MariaDB.
 package storage
 
-import "github.com/dominikbraun/todo/model"
+import (
+	"errors"
+
+	"github.com/dominikbraun/todo/model"
+)
+
+var (
+	ErrToDoAlreadyExists = errors.New("ToDo item already exists")
+	ErrToDoNotFound      = errors.New("requested ToDo item not found")
+)
 
 // Storage represents a storage backend.
 type Storage interface {
 
-	// Install initializes the storage so that calls to the other functions like
-	// CreateToDo are safe to perform.
+	// Initialize sets up the storage if it hasn't been set up yet. Methods like
+	// CreateToDo should be safe to call after running Initialize.
 	//
-	// For example, a MongoDB backend should create the required buckets to
-	// store ToDo items, while a MariaDB backend should create the corresponding
-	// tables.
-	Install() error
+	// For example, a SQL storage should create the required database and tables
+	// if they don't exist yet. Otherwise, nothing should happen.
+	Initialize() error
 
 	// CreateToDo stores a new ToDo item and returns the inserted entity.
 	CreateToDo(toDo model.ToDo) (model.ToDo, error)

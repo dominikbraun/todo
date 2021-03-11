@@ -2,58 +2,69 @@ package storage
 
 import (
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
+
 	"github.com/dominikbraun/todo/model"
+
+	"github.com/Masterminds/squirrel"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
-const (
-	createToDosTable = `
-CREATE TABLE todos (
-	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(100) NOT NULL,
-	description VARCHAR(500)
-)`
-	createTasksTable = `
-CREATE TABLE tasks (
-	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	name VARCHAR(100) NOT NULL,
-	description VARCHAR(500),
-	todo_id BIGINT UNSIGNED NOT NULL
-)`
-)
-
-type mariaDB struct {
-	db *sqlx.DB
+type MariaDBConfig struct {
+	User     string
+	Password string
+	Address  string
 }
 
-func NewMariaDB(user, password, address, database string) (*mariaDB, error) {
-	dsn := fmt.Sprintf("%s:%s@(%s)/%s", user, password, address, database)
-	db, err := sqlx.Open("mysql", dsn)
+func (m MariaDBConfig) URI() string {
+	return fmt.Sprintf("%s:%s@(%s)/", m.User, m.Password, m.Address)
+}
+
+type mariaDB struct {
+	config MariaDBConfig
+	db     *sqlx.DB
+}
+
+func NewMariaDB(config MariaDBConfig) (*mariaDB, error) {
+	db, err := sqlx.Open("mysql", config.URI())
 	if err != nil {
 		return nil, err
 	}
 
 	return &mariaDB{
-		db: db,
+		config: config,
+		db:     db,
 	}, nil
 }
 
-func (m *mariaDB) Install() error {
-	if _, err := m.db.Exec(createToDosTable); err != nil {
-		return err
+func (m *mariaDB) Initialize() error {
+	statements := []string{
+		`CREATE DATABASE IF NOT EXISTS todo_app`,
+		`USE todo_app`,
+		`CREATE TABLE IF NOT EXISTS todos (
+			id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+			name VARCHAR(100) NOT NULL,
+			description VARCHAR(500)
+		)`,
+		`CREATE TABLE IF NOT EXISTS tasks (
+			id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+			name VARCHAR(100) NOT NULL,
+			description VARCHAR(500),
+			todo_id BIGINT UNSIGNED NOT NULL
+		)`,
 	}
 
-	if _, err := m.db.Exec(createTasksTable); err != nil {
-		return err
+	for _, statement := range statements {
+		if _, err := m.db.Exec(statement); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func (m *mariaDB) CreateToDo(toDo model.ToDo) (model.ToDo, error) {
-	sql, args, _ := sq.
+	sql, args, _ := squirrel.
 		Insert("todos").
 		Columns("name", "description").
 		Values(toDo.Name, toDo.Description).
@@ -79,7 +90,7 @@ func (m *mariaDB) CreateToDo(toDo model.ToDo) (model.ToDo, error) {
 }
 
 func (m *mariaDB) FindToDos() ([]model.ToDo, error) {
-	sql, _, _ := sq.
+	sql, _, _ := squirrel.
 		Select("id", "name", "description").
 		From("todos").
 		ToSql()
@@ -110,10 +121,10 @@ func (m *mariaDB) FindToDos() ([]model.ToDo, error) {
 }
 
 func (m *mariaDB) FindToDoByID(id int64) (model.ToDo, error) {
-	sql, args, _ := sq.
+	sql, args, _ := squirrel.
 		Select("id", "name", "description").
 		From("todos").
-		Where(sq.Eq{"id": id}).
+		Where(squirrel.Eq{"id": id}).
 		ToSql()
 
 	var toDo model.ToDo
@@ -133,9 +144,9 @@ func (m *mariaDB) FindToDoByID(id int64) (model.ToDo, error) {
 }
 
 func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
-	sql, args, _ := sq.
+	sql, args, _ := squirrel.
 		Delete("tasks").
-		Where(sq.Eq{"todo_id": id}).
+		Where(squirrel.Eq{"todo_id": id}).
 		ToSql()
 
 	_, err := m.db.Exec(sql, args...)
@@ -153,11 +164,11 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 		newTasks = append(newTasks, task)
 	}
 
-	sql, args, _ = sq.
+	sql, args, _ = squirrel.
 		Update("todos").
 		Set("name", toDo.Name).
 		Set("description", toDo.Description).
-		Where(sq.Eq{"id": id}).
+		Where(squirrel.Eq{"id": id}).
 		ToSql()
 
 	_, err = m.db.Exec(sql, args...)
@@ -172,9 +183,9 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 }
 
 func (m *mariaDB) DeleteToDo(id int64) error {
-	sql, args, _ := sq.
+	sql, args, _ := squirrel.
 		Delete("tasks").
-		Where(sq.Eq{"todo_id": id}).
+		Where(squirrel.Eq{"todo_id": id}).
 		ToSql()
 
 	_, err := m.db.Exec(sql, args...)
@@ -182,9 +193,9 @@ func (m *mariaDB) DeleteToDo(id int64) error {
 		return err
 	}
 
-	sql, args, _ = sq.
+	sql, args, _ = squirrel.
 		Delete("todos").
-		Where(sq.Eq{"id": id}).
+		Where(squirrel.Eq{"id": id}).
 		ToSql()
 
 	_, err = m.db.Exec(sql, args...)
@@ -196,7 +207,7 @@ func (m *mariaDB) DeleteToDo(id int64) error {
 }
 
 func (m *mariaDB) createTaskForToDo(toDoId int64, task model.Task) (model.Task, error) {
-	sql, args, _ := sq.
+	sql, args, _ := squirrel.
 		Insert("tasks").
 		Columns("name", "description", "todo_id").
 		Values(task.Name, task.Description, toDoId).
@@ -214,10 +225,10 @@ func (m *mariaDB) createTaskForToDo(toDoId int64, task model.Task) (model.Task, 
 }
 
 func (m *mariaDB) findTasksByToDo(toDoID int64) ([]model.Task, error) {
-	sql, args, _ := sq.
+	sql, args, _ := squirrel.
 		Select("id", "name", "description").
 		From("todos").
-		Where(sq.Eq{"todo_id": toDoID}).
+		Where(squirrel.Eq{"todo_id": toDoID}).
 		ToSql()
 
 	rows, err := m.db.Queryx(sql, args...)
