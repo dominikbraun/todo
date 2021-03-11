@@ -44,7 +44,7 @@ func (a *App) GetToDos() ([]model.ToDo, error) {
 func (a *App) GetToDo(id int64) (model.ToDo, error) {
 	toDo, err := a.storage.FindToDoByID(id)
 
-	if errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, storage.ErrToDoNotFound) {
 		return model.ToDo{}, ErrToDoNotFound
 	} else if err != nil {
 		return model.ToDo{}, err

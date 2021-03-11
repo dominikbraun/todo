@@ -17,7 +17,7 @@ import (
 
 // errorResponse will be returned by the REST API in case an error occurred.
 type errorResponse struct {
-	Error error `json:"error"`
+	Error string `json:"error"`
 }
 
 // RESTController represents a controller capable of handling incoming HTTP
@@ -159,7 +159,7 @@ func respond(writer http.ResponseWriter, request *http.Request, status int, v in
 	content := v
 
 	if err, isError := v.(error); isError {
-		content = errorResponse{Error: err}
+		content = errorResponse{Error: err.Error()}
 	}
 
 	render.Status(request, status)
