@@ -15,8 +15,8 @@ import (
 	"github.com/go-chi/render"
 )
 
-// ErrorResponse will be returned by the REST API in case an error occurred.
-type ErrorResponse struct {
+// errorResponse will be returned by the REST API in case an error occurred.
+type errorResponse struct {
 	Error error `json:"error"`
 }
 
@@ -152,14 +152,14 @@ func (r *RESTController) DeleteToDo() http.HandlerFunc {
 }
 
 // respond renders an HTTP response with the given status code and content.
-
+//
 // respond won't dispatch the response. In case the content is an error value,
-// it will automatically be wrapped in an ErrorResponse instance.
+// it will automatically be wrapped in an errorResponse instance.
 func respond(writer http.ResponseWriter, request *http.Request, status int, v interface{}) {
 	content := v
 
 	if err, isError := v.(error); isError {
-		content = ErrorResponse{Error: err}
+		content = errorResponse{Error: err}
 	}
 
 	render.Status(request, status)
