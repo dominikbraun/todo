@@ -131,7 +131,7 @@ func (m *mariaDB) FindToDos() ([]model.ToDo, error) {
 	return toDos, nil
 }
 
-// FindToDoByID searches a ToDo item with the provided ID and returns that item
+// FindToDoByID looks for a ToDo item with the provided ID and returns that item
 // if it was found. Otherwise, core.ErrToDoNotFound will be returned.
 func (m *mariaDB) FindToDoByID(id int64) (model.ToDo, error) {
 	sql, args, _ := squirrel.
