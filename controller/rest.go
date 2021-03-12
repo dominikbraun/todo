@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dominikbraun/todo/core"
 	"github.com/dominikbraun/todo/model"
-	"github.com/dominikbraun/todo/todo"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -23,12 +23,12 @@ type errorResponse struct {
 // RESTController represents a controller capable of handling incoming HTTP
 // requests and yielding a corresponding JSON result.
 type RESTController struct {
-	app *todo.App
+	app *core.App
 }
 
 // NewRESTController returns a new REST controller instance that will use the
 // provided app instance for triggering business logic.
-func NewRESTController(app *todo.App) *RESTController {
+func NewRESTController(app *core.App) *RESTController {
 	return &RESTController{
 		app: app,
 	}
@@ -82,7 +82,7 @@ func (r *RESTController) GetToDo() http.HandlerFunc {
 		toDo, err := r.app.GetToDo(int64(id))
 		if err != nil {
 			status := http.StatusInternalServerError
-			if errors.Is(err, todo.ErrToDoNotFound) {
+			if errors.Is(err, core.ErrToDoNotFound) {
 				status = http.StatusNotFound
 			}
 			respond(writer, request, status, err)
@@ -115,7 +115,7 @@ func (r *RESTController) UpdateToDo() http.HandlerFunc {
 		err = r.app.UpdateToDo(int64(id), toDo)
 		if err != nil {
 			status := http.StatusInternalServerError
-			if errors.Is(err, todo.ErrToDoNotFound) {
+			if errors.Is(err, core.ErrToDoNotFound) {
 				status = http.StatusNotFound
 			}
 			respond(writer, request, status, err)
@@ -140,7 +140,7 @@ func (r *RESTController) DeleteToDo() http.HandlerFunc {
 
 		if err := r.app.DeleteToDo(int64(id)); err != nil {
 			status := http.StatusInternalServerError
-			if errors.Is(err, todo.ErrToDoNotFound) {
+			if errors.Is(err, core.ErrToDoNotFound) {
 				status = http.StatusNotFound
 			}
 			respond(writer, request, status, err)

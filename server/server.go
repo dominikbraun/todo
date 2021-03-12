@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/dominikbraun/todo/controller"
-	"github.com/dominikbraun/todo/todo"
+	"github.com/dominikbraun/todo/core"
 
 	"github.com/go-chi/chi"
 )
@@ -29,7 +29,7 @@ type Server struct {
 
 // New creates a new HTTP server. The given app instance will be used by the
 // REST controller in order to handle requests.
-func New(port uint, app *todo.App) *Server {
+func New(port uint, app *core.App) *Server {
 	address := fmt.Sprintf(":%v", port)
 
 	server := &Server{

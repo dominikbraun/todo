@@ -4,9 +4,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/dominikbraun/todo/core"
 	"github.com/dominikbraun/todo/server"
 	"github.com/dominikbraun/todo/storage"
-	"github.com/dominikbraun/todo/todo"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -29,7 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := todo.New(mariaDB)
+	app := core.NewApp(mariaDB)
 	srv := server.New(flags.ServerPort, app)
 
 	if err := srv.Run(); err != nil {

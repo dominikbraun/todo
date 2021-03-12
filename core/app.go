@@ -1,6 +1,6 @@
-// Package todo provides the core application functionality and business logic
+// Package core provides the core application functionality and business logic
 // triggered by controllers like the REST controller.
-package todo
+package core
 
 import (
 	"database/sql"
@@ -21,9 +21,9 @@ type App struct {
 	storage storage.Storage
 }
 
-// New creates a new App instance that persists data to the given storage. The
-// storage has to be fully initialized and ready-to-use for the app.
-func New(storage storage.Storage) *App {
+// NewApp creates a new App instance that persists data to the given storage.
+// The storage has to be fully initialized and ready-to-use for the app.
+func NewApp(storage storage.Storage) *App {
 	return &App{
 		storage: storage,
 	}
