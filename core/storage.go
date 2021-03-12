@@ -1,6 +1,6 @@
-// Package storage provides a generic, database-agnostic storage interface as
-// well as a default implementation for MariaDB.
-package storage
+// Package core provides the core application functionality and business logic
+// triggered by controllers like the REST controller.
+package core
 
 import (
 	"errors"
@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ErrToDoAlreadyExists = errors.New("ToDo item already exists")
-	ErrToDoNotFound      = errors.New("requested ToDo item not found")
+	// ErrToDoNotFound indicates that a requested ToDo item cannot be found.
+	ErrToDoNotFound = errors.New("requested ToDo item not found")
 )
 
 // Storage represents a storage backend.

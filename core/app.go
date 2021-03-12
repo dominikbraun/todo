@@ -3,27 +3,18 @@
 package core
 
 import (
-	"database/sql"
-	"errors"
-
 	"github.com/dominikbraun/todo/model"
-	"github.com/dominikbraun/todo/storage"
-)
-
-var (
-	// ErrToDoNotFound indicates that a requested ToDo item cannot be found.
-	ErrToDoNotFound = errors.New("requested ToDo item not found")
 )
 
 // App represents the core application. At this time, it merely consists of an
 // arbitrary storage.Storage implementation for accessing ToDo items.
 type App struct {
-	storage storage.Storage
+	storage Storage
 }
 
 // NewApp creates a new App instance that persists data to the given storage.
 // The storage has to be fully initialized and ready-to-use for the app.
-func NewApp(storage storage.Storage) *App {
+func NewApp(storage Storage) *App {
 	return &App{
 		storage: storage,
 	}
@@ -42,41 +33,17 @@ func (a *App) GetToDos() ([]model.ToDo, error) {
 
 // GetToDo returns the ToDo with the given ID or an error if it doesn't exist.
 func (a *App) GetToDo(id int64) (model.ToDo, error) {
-	toDo, err := a.storage.FindToDoByID(id)
-
-	if errors.Is(err, storage.ErrToDoNotFound) {
-		return model.ToDo{}, ErrToDoNotFound
-	} else if err != nil {
-		return model.ToDo{}, err
-	}
-
-	return toDo, nil
+	return a.storage.FindToDoByID(id)
 }
 
 // UpdateToDo updates a ToDo item by replacing the stored item with the given ID
 // with the provided item. Depending on the underlying storage, the IDs of the
 // ToDo's sub-tasks may change.
 func (a *App) UpdateToDo(id int64, toDo model.ToDo) error {
-	err := a.storage.UpdateToDo(id, toDo)
-
-	if errors.Is(err, sql.ErrNoRows) {
-		return ErrToDoNotFound
-	} else if err != nil {
-		return err
-	}
-
-	return nil
+	return a.storage.UpdateToDo(id, toDo)
 }
 
 // DeleteToDo deletes the ToDo item with the given ID along with its sub-tasks.
 func (a *App) DeleteToDo(id int64) error {
-	err := a.storage.DeleteToDo(id)
-
-	if errors.Is(err, sql.ErrNoRows) {
-		return ErrToDoNotFound
-	} else if err != nil {
-		return err
-	}
-
-	return nil
+	return a.storage.DeleteToDo(id)
 }
