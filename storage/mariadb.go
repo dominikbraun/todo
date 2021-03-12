@@ -25,21 +25,40 @@ func (m MariaDBConfig) URI() string {
 }
 
 type mariaDB struct {
-	config MariaDBConfig
-	db     *sqlx.DB
+	config        MariaDBConfig
+	db            *sqlx.DB
+	isInitialized bool
 }
 
 // NewMariaDB creates a new MariaDB connection using the given configuration.
 func NewMariaDB(config MariaDBConfig) (*mariaDB, error) {
-	db, err := sqlx.Connect("mysql", config.URI())
-	if err != nil {
+	mariaDB := &mariaDB{
+		config: config,
+	}
+
+	if err := mariaDB.connect(); err != nil {
 		return nil, err
 	}
 
-	return &mariaDB{
-		config: config,
-		db:     db,
-	}, nil
+	return mariaDB, nil
+}
+
+// connect establishes a connection to the configured MariaDB host. If MariaDB
+// is already initialized, i.e. Initialize has been called, connect will try to
+// connect directly to the database and not just the host.
+func (m *mariaDB) connect() error {
+	uri := m.config.URI()
+	if m.isInitialized {
+		uri = uri + "todo_app"
+	}
+
+	db, err := sqlx.Connect("mysql", uri)
+	if err != nil {
+		return err
+	}
+
+	m.db = db
+	return nil
 }
 
 // Initialize creates the database along with the required tables if they don't
@@ -68,7 +87,12 @@ func (m *mariaDB) Initialize() error {
 		}
 	}
 
-	return nil
+	m.isInitialized = true
+
+	// Close the database connection and re-connect directly to the database.
+	// See https://stackoverflow.com/q/19927879 for more information.
+	_ = m.db.Close()
+	return m.connect()
 }
 
 // CreateToDo inserts the given ToDo item into its table. CreateToDo expects a
@@ -288,7 +312,7 @@ func (m *mariaDB) createTaskForToDo(toDoId int64, task model.Task) (model.Task, 
 func (m *mariaDB) findTasksByToDoID(toDoID int64) ([]model.Task, error) {
 	sql, args, _ := squirrel.
 		Select("id", "name", "description").
-		From("todos").
+		From("tasks").
 		Where(squirrel.Eq{"todo_id": toDoID}).
 		ToSql()
 
