@@ -1,3 +1,4 @@
+// Package main provides the entrypoint and functions for parsing CLI flags.
 package main
 
 import (
@@ -12,15 +13,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Flags struct {
-	MariaDB    storage.MariaDBConfig
-	ServerPort uint
+type flags struct {
+	mariaDB    storage.MariaDBConfig
+	serverPort uint
 }
 
 func main() {
 	flags := parseCommandLineFlags()
 
-	mariaDB, err := storage.NewMariaDB(flags.MariaDB)
+	mariaDB, err := storage.NewMariaDB(flags.mariaDB)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,14 +31,17 @@ func main() {
 	}
 
 	app := core.NewApp(mariaDB)
-	srv := server.New(flags.ServerPort, app)
+	srv := server.New(flags.serverPort, app)
 
 	if err := srv.Run(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func parseCommandLineFlags() Flags {
+// parseCommandLineFlags parses the application configuration from the CLI flags
+// as well as environment variables. A configuration value like `port` either
+// can be passed to the binary as --port flag or set as TODO_PORT variable.
+func parseCommandLineFlags() flags {
 
 	pflag.String("mariadb-user", "admin", "The MariaDB user")
 	pflag.String("mariadb-password", "admin", "The MariaDB password")
@@ -52,13 +56,13 @@ func parseCommandLineFlags() Flags {
 	viper.SetEnvPrefix("TODO")
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
-	flags := Flags{
-		MariaDB: storage.MariaDBConfig{
+	flags := flags{
+		mariaDB: storage.MariaDBConfig{
 			User:     viper.GetString("mariadb-user"),
 			Password: viper.GetString("mariadb-password"),
 			Address:  viper.GetString("mariadb-address"),
 		},
-		ServerPort: viper.GetUint("port"),
+		serverPort: viper.GetUint("port"),
 	}
 
 	return flags
