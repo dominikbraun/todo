@@ -34,8 +34,7 @@ func (a *App) GetToDo(id int64) (model.ToDo, error) {
 }
 
 // UpdateToDo updates a ToDo item by replacing the stored item with the given ID
-// with the provided item. Depending on the underlying storage, the IDs of the
-// ToDo's sub-tasks may change.
+// with the provided item.
 func (a *App) UpdateToDo(id int64, toDo model.ToDo) error {
 	return a.storage.UpdateToDo(id, toDo)
 }

@@ -108,12 +108,12 @@ func (m *mariaDB) CreateToDo(toDo model.ToDo) (model.ToDo, error) {
 	id, _ := result.LastInsertId()
 	toDo.ID = id
 
-	for _, t := range toDo.Tasks {
-		task, err := m.createTaskForToDo(toDo.ID, t)
+	for i, task := range toDo.Tasks {
+		createdTask, err := m.createTaskForToDo(toDo.ID, task)
 		if err != nil {
 			return model.ToDo{}, err
 		}
-		toDo.Tasks = append(toDo.Tasks, task)
+		toDo.Tasks[i] = createdTask
 	}
 
 	return toDo, nil
