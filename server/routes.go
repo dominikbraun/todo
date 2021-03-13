@@ -1,5 +1,4 @@
-// Package server provides an easy-to-use HTTP server that exposes a REST API
-// and serves the ToDo application.
+// Package server provides an HTTP server implementation serving the ToDo app.
 package server
 
 import (

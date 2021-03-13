@@ -1,5 +1,4 @@
-// Package server provides an easy-to-use HTTP server that exposes a REST API
-// and serves the ToDo application.
+// Package server provides an HTTP server implementation serving the ToDo app.
 package server
 
 import (
@@ -18,17 +17,14 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// Server represents an HTTP server. It is listening on the configured address
-// using a http.Server instance. Incoming HTTP requests will be routed by the
-// chi.Router and processed by a controller.RESTController instance.
+// Server represents an easy-to-use HTTP server that exposes a REST API.
 type Server struct {
 	router     chi.Router
 	internal   *http.Server
 	controller *controller.RESTController
 }
 
-// New creates a new HTTP server. The given app instance will be used by the
-// REST controller in order to handle requests.
+// New creates a server that uses the given app instance to handle requests.
 func New(port uint, app *core.App) *Server {
 	address := fmt.Sprintf(":%v", port)
 
@@ -43,8 +39,8 @@ func New(port uint, app *core.App) *Server {
 	return server
 }
 
-// Run starts the server, listening on the configured address. Can be stopped by
-// sending an interrupt signal, e.g. by pressing Ctrl + C.
+// Run starts the server. It will serve requests on the configured address until
+// an interrupt signal has been received, e.g. by pressing Ctrl + C.
 func (s *Server) Run() error {
 	shutdown := make(chan os.Signal)
 	signal.Notify(shutdown, os.Interrupt)

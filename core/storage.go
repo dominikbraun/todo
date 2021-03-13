@@ -1,5 +1,4 @@
-// Package core provides the core application functionality and business logic
-// triggered by controllers like the REST controller.
+// Package core provides the core application functionality and business logic.
 package core
 
 import (
@@ -16,11 +15,11 @@ var (
 // Storage represents a storage backend.
 type Storage interface {
 
-	// Initialize sets up the storage if it hasn't been set up yet. Methods like
-	// CreateToDo should be safe to call after running Initialize.
+	// Initialize initializes the storage if it hasn't been set up yet. Methods
+	// like CreateToDo must be safe to call after running Initialize.
 	//
-	// For example, a SQL storage should create the required database and tables
-	// if they don't exist yet. Otherwise, nothing should happen.
+	// For example, a SQL storage implementation should creates the required
+	// database and tables if they don't exist yet.
 	Initialize() error
 
 	// CreateToDo stores a new ToDo item and returns the inserted entity.

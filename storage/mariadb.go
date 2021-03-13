@@ -18,8 +18,7 @@ type MariaDBConfig struct {
 	Address  string
 }
 
-// URI creates an URI for connecting to the configured database host. It yields
-// a connection string in the form <user>:<password>@<host>:<port>/.
+// URI yields a connection string in the form <user>:<password>@<host>:<port>/.
 func (m MariaDBConfig) URI() string {
 	return fmt.Sprintf("%s:%s@(%s)/", m.User, m.Password, m.Address)
 }
@@ -43,9 +42,9 @@ func NewMariaDB(config MariaDBConfig) (*mariaDB, error) {
 	return mariaDB, nil
 }
 
-// connect establishes a connection to the configured MariaDB host. If MariaDB
-// is already initialized, i.e. Initialize has been called, connect will try to
-// connect directly to the database and not just the host.
+// connect tries to establish a connection to the configured MariaDB host. If
+// MariaDB has already been initialized using Initialize, connect will try to
+// directly connect to the database.
 func (m *mariaDB) connect() error {
 	uri := m.config.URI()
 	if m.isInitialized {
@@ -61,9 +60,7 @@ func (m *mariaDB) connect() error {
 	return nil
 }
 
-// Initialize creates the database along with the required tables if they don't
-// exist yet. After running Initialize without an error, all other operations
-// are safe to perform.
+// Initialize creates the MariaDB database and tables if they don't exist yet.
 func (m *mariaDB) Initialize() error {
 	statements := []string{
 		`CREATE DATABASE IF NOT EXISTS todo_app`,

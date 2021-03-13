@@ -15,7 +15,6 @@ import (
 	"github.com/go-chi/render"
 )
 
-// errorResponse will be returned by the REST API in case an error occurred.
 type errorResponse struct {
 	Error string `json:"error"`
 }

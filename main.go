@@ -1,4 +1,5 @@
-// Package main provides the entrypoint and functions for parsing CLI flags.
+// Package main provides the application entrypoint as well as functions for
+// parsing CLI flags and environment variables.
 package main
 
 import (
@@ -13,13 +14,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-type flags struct {
+// config stores all configuration values required to run the ToDo app.
+type config struct {
 	mariaDB    storage.MariaDBConfig
 	serverPort uint
 }
 
 func main() {
-	flags := parseCommandLineFlags()
+	flags := parseApplicationConfig()
 
 	mariaDB, err := storage.NewMariaDB(flags.mariaDB)
 	if err != nil {
@@ -38,10 +40,12 @@ func main() {
 	}
 }
 
-// parseCommandLineFlags parses the application configuration from the CLI flags
-// as well as environment variables. A configuration value like `port` either
-// can be passed to the binary as --port flag or set as TODO_PORT variable.
-func parseCommandLineFlags() flags {
+// parseApplicationConfig parses the application configuration from multiple
+// sources. Currently, these sources are CLI flags and environment variables.
+//
+// A configuration value like `port` can either be passed to the binary as a
+// --port flag or specified as a TODO_PORT environment variable.
+func parseApplicationConfig() config {
 
 	pflag.String("mariadb-user", "admin", "The MariaDB user")
 	pflag.String("mariadb-password", "admin", "The MariaDB password")
@@ -56,7 +60,7 @@ func parseCommandLineFlags() flags {
 	viper.SetEnvPrefix("TODO")
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
-	flags := flags{
+	flags := config{
 		mariaDB: storage.MariaDBConfig{
 			User:     viper.GetString("mariadb-user"),
 			Password: viper.GetString("mariadb-password"),

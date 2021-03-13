@@ -1,5 +1,4 @@
-// Package core provides the core application functionality and business logic
-// triggered by controllers like the REST controller.
+// Package core provides the core application functionality and business logic.
 package core
 
 import (
@@ -13,7 +12,6 @@ type App struct {
 }
 
 // NewApp creates a new App instance that persists data to the given storage.
-// The storage has to be fully initialized and ready-to-use for the app.
 func NewApp(storage Storage) *App {
 	return &App{
 		storage: storage,
@@ -21,7 +19,6 @@ func NewApp(storage Storage) *App {
 }
 
 // CreateToDo creates a new ToDo item. The provided item should not have an ID.
-// Instead, CreateToDo will return the freshly created item including its ID.
 func (a *App) CreateToDo(toDo model.ToDo) (model.ToDo, error) {
 	return a.storage.CreateToDo(toDo)
 }
