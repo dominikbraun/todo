@@ -51,9 +51,11 @@ func (m *memory) CreateToDo(toDo model.ToDo) (model.ToDo, error) {
 // FindToDos returns all ToDo items stored in memory.
 func (m *memory) FindToDos() ([]model.ToDo, error) {
 	toDos := make([]model.ToDo, len(m.internal))
+	index := 0
 
-	for i, toDo := range m.internal {
-		toDos[i] = toDo
+	for _, toDo := range m.internal {
+		toDos[index] = toDo
+		index++
 	}
 
 	return toDos, nil
