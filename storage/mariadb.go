@@ -4,6 +4,7 @@ package storage
 import (
 	"fmt"
 
+	"github.com/dominikbraun/todo/core"
 	"github.com/dominikbraun/todo/model"
 
 	"github.com/Masterminds/squirrel"
@@ -162,8 +163,9 @@ func (m *mariaDB) FindToDoByID(id int64) (model.ToDo, error) {
 
 	var toDo model.ToDo
 
-	if err := m.db.QueryRowx(sql, args...).StructScan(&toDo); err != nil {
-		return model.ToDo{}, err
+	err := m.db.QueryRowx(sql, args...).StructScan(&toDo)
+	if err != nil {
+		return model.ToDo{}, core.ErrToDoNotFound
 	}
 
 	tasks, err := m.findTasksByToDoID(toDo.ID)
@@ -317,7 +319,7 @@ func (m *mariaDB) findTasksByToDoID(toDoID int64) ([]model.Task, error) {
 		return nil, err
 	}
 
-	var tasks []model.Task
+	tasks := make([]model.Task, 0)
 
 	for rows.Next() {
 		var task model.Task
