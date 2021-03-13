@@ -150,17 +150,20 @@ func (r *RESTController) DeleteToDo() http.HandlerFunc {
 	}
 }
 
-// respond renders an HTTP response with the given status code and content.
+// respond writes the status code as well as the JSON body to an HTTP response.
 //
-// respond won't dispatch the response. In case the content is an error value,
-// it will automatically be wrapped in an errorResponse instance.
+// If v is nil, the response body will be empty. In addition, an errorResponse
+// instance will be rendered automatically if v is an error value.
 func respond(writer http.ResponseWriter, request *http.Request, status int, v interface{}) {
-	content := v
+	render.Status(request, status)
+
+	response := v
 
 	if err, isError := v.(error); isError {
-		content = errorResponse{Error: err.Error()}
+		response = errorResponse{Error: err.Error()}
 	}
 
-	render.Status(request, status)
-	render.JSON(writer, request, content)
+	if response != nil {
+		render.JSON(writer, request, response)
+	}
 }

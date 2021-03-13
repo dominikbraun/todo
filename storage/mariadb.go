@@ -264,6 +264,11 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 // DeleteToDo deletes the ToDo item with the given ID. If the ToDo item cannot
 // be found, core.ErrToDoNotFound will be returned.
 func (m *mariaDB) DeleteToDo(id int64) error {
+	// Return a possible core.ErrToDoNotFound error if the ToDo doesn't exist.
+	if _, err := m.FindToDoByID(id); err != nil {
+		return err
+	}
+
 	sql, args, _ := squirrel.
 		Delete("tasks").
 		Where(squirrel.Eq{"todo_id": id}).
