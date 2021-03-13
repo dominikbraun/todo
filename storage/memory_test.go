@@ -185,34 +185,41 @@ func TestMemory_DeleteToDo(t *testing.T) {
 // equal. If they aren't, the given testing.T will be used to log an error.
 func assertEqual(t *testing.T, expected, actual model.ToDo) {
 	if expected.ID != actual.ID {
-		t.Errorf("expected ID %d, got %d", expected.ID, actual.ID)
+		format := "expected ID %d, got %d"
+		t.Errorf(format, expected.ID, actual.ID)
 	}
 
 	if expected.Name != actual.Name {
-		t.Errorf("expected name %s, got %s", expected.Name, actual.Name)
+		format := "expected name %s, got %s"
+		t.Errorf(format, expected.Name, actual.Name)
 	}
 
 	if expected.Description != actual.Description {
-		t.Errorf("expected description %s, got %s", expected.Description, actual.Description)
+		format := "expected description %s, got %s"
+		t.Errorf(format, expected.Description, actual.Description)
 	}
 
 	if len(expected.Tasks) != len(actual.Tasks) {
-		t.Fatalf("expected %d tasks, got %d", len(expected.Tasks), len(actual.Tasks))
+		format := "expected %d tasks, got %d"
+		t.Fatalf(format, len(expected.Tasks), len(actual.Tasks))
 	}
 
 	for i, task := range expected.Tasks {
 		actualTask := actual.Tasks[i]
 
 		if task.ID != actualTask.ID {
-			t.Errorf("expected task ID %d, got %d", task.ID, actualTask.ID)
+			format := "expected task ID %d, got %d"
+			t.Errorf(format, task.ID, actualTask.ID)
 		}
 
 		if task.Name != actualTask.Name {
-			t.Errorf("expected task name %s, got %s", task.Name, actualTask.Name)
+			format := "expected task name %s, got %s"
+			t.Errorf(format, task.Name, actualTask.Name)
 		}
 
 		if task.Description != actualTask.Description {
-			t.Errorf("expected task description %s, got %s", task.Description, actualTask.Description)
+			format := "expected task description %s, got %s"
+			t.Errorf(format, task.Description, actualTask.Description)
 		}
 	}
 }
