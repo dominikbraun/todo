@@ -131,7 +131,7 @@ func (m *mariaDB) FindToDos() ([]model.ToDo, error) {
 		return nil, err
 	}
 
-	var toDos []model.ToDo
+	toDos := make([]model.ToDo, 0)
 
 	for rows.Next() {
 		var toDo model.ToDo
