@@ -234,7 +234,7 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 
 	for _, task := range toDo.Tasks {
 		if task.ID == 0 {
-			insert.Values(task.Name, task.Description, id)
+			insert = insert.Values(task.Name, task.Description, id)
 		}
 	}
 
