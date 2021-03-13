@@ -198,7 +198,8 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 	taskIDs := make([]int64, 0)
 
 	for _, task := range toDo.Tasks {
-		// If the task has an ID assigned, just update the task.
+		// If the task has an ID assigned, it is considered to be an existing
+		// task that can be updated.
 		if task.ID != 0 {
 			sql, args, _ := squirrel.
 				Update("tasks").
@@ -214,8 +215,8 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 		}
 	}
 
-	// Delete the tasks that are not listed in the ToDo item, i.e. all tasks
-	// that haven't been added to the list of valid tasks before.
+	// Delete all tasks that are not listed in the ToDo item, i.e. all tasks
+	// that exist in the database but have not just been updated.
 	sql, args, _ := squirrel.
 		Delete("tasks").
 		Where(squirrel.And{
@@ -228,8 +229,6 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 		return err
 	}
 
-	// Existing tasks have been updated and removed tasks have been deleted at
-	// this point. Finally, insert all new tasks.
 	insert := squirrel.
 		Insert("tasks").
 		Columns("name", "description", "todo_id")
@@ -241,11 +240,14 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 	}
 
 	sql, args, _ = insert.ToSql()
-	if _, err := m.db.Exec(sql, args...); err != nil {
-		return err
+
+	// Only run the INSERT statement if there are values to insert.
+	if sql != "" {
+		if _, err := m.db.Exec(sql, args...); err != nil {
+			return err
+		}
 	}
 
-	// All tasks are done - update the ToDo item itself.
 	sql, args, _ = squirrel.
 		Update("todos").
 		Set("name", toDo.Name).
