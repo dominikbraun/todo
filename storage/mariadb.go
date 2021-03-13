@@ -92,8 +92,7 @@ func (m *mariaDB) Initialize() error {
 	return m.connect()
 }
 
-// CreateToDo inserts the given ToDo item into its table. CreateToDo expects a
-// ToDo item without an ID.
+// CreateToDo inserts the given ToDo item, which is expected to not have an ID.
 func (m *mariaDB) CreateToDo(toDo model.ToDo) (model.ToDo, error) {
 	sql, args, _ := squirrel.
 		Insert("todos").

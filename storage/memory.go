@@ -30,9 +30,10 @@ func (m *memory) Initialize() error {
 	return nil
 }
 
-// CreateToDo stores the given ToDo item in memory. CreateToDo expects an item
-// without ID and will, similarly to the MariaDB storage implementation, assign
-// an auto-incremented ID to each task.
+// CreateToDo inserts the given ToDo item, which is expected to not have an ID.
+//
+// Just like the MariaDB implementation, CreateToDo assigns an auto-incremented
+// ID to each sub-task.
 func (m *memory) CreateToDo(toDo model.ToDo) (model.ToDo, error) {
 	for i, _ := range toDo.Tasks {
 		m.taskID++
