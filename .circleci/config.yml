@@ -1,0 +1,141 @@
+version: 2.1
+
+executors:
+  go-container:
+    docker:
+      - image: circleci/golang:1.15
+    environment:
+      GO111MODULE: "on"
+      GOPROXY: "https://proxy.golang.org"
+
+jobs:
+  # Run static Go-related checks, e.g. code formatting.
+  go-checks:
+    executor: go-container
+    steps:
+      - checkout
+      - run:
+          name: Install goimports tool
+          command: |
+            go get -u golang.org/x/tools/cmd/goimports
+            echo "export PATH=$GOPATH/bin:$PATH" >> $BASH_ENV
+      - run:
+          name: Check Go format
+          command: "! go fmt -l . | read"
+      - run:
+          name: Check Go imports
+          command: "! goimports -l . | read"
+
+  # Run all Go tests.
+  go-test:
+    executor: go-container
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gomodules-v1-{{ checksum "go.mod" }}
+            - gomodules-v1-
+      - run:
+          name: Download dependencies
+          command: go mod download
+      - save_cache:
+          key: gomodules-v1-{{ checksum "go.mod" }}
+          paths: /go/pkg
+      - run:
+          name: Run all tests
+          command: go test -v ./...
+
+  # Build binaries for multiple platforms.
+  build:
+    executor: go-container
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gomodules-v1-{{ checksum "go.mod" }}
+            - gomodules-v1-
+      - run:
+          name: Download dependencies
+          command: go mod download
+      - save_cache:
+          key: gomodules-v1-{{ checksum "go.mod" }}
+          paths: /go/pkg
+      - run: mkdir -p /tmp/artifacts
+      - run:
+          name: Build and pack the binary for Linux
+          command: |
+            GOOS=linux GOARCH=amd64 go build \
+              -v \
+              -o target/todo .
+            cp target/todo todo
+            tar -czf /tmp/artifacts/todo-linux-amd64.tar.gz todo
+            rm todo
+      - run:
+          name: Build and pack the binary for macOS
+          command: |
+            GOOS=darwin GOARCH=amd64 go build \
+              -v \
+              -o target/todo .
+            cp target/todo todo
+            tar -czf /tmp/artifacts/todo-darwin-amd64.tar.gz todo
+            rm todo
+      - run:
+          name: Build and pack the executable for Windows
+          command: |
+            GOOS=windows GOARCH=amd64 go build \
+              -v \
+              -o target/todo.exe .
+            cp target/todo.exe todo.exe
+            zip /tmp/artifacts/todo-windows-amd64.zip todo.exe
+            rm todo.exe
+      - persist_to_workspace:
+          root: /tmp/artifacts
+          paths:
+            - todo-*
+
+  # Release the packaged binaries to GitHub.
+  release-github:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/artifacts
+      - run:
+          name: Install Python
+          command: apk add --no-cache python2
+      - run:
+          name: Publish GitHub release
+          command: |
+            ghr -t "${GITHUB_TOKEN}" \
+                -u "${CIRCLE_PROJECT_USERNAME}" \
+                -r "${CIRCLE_PROJECT_REPONAME}" \
+                -c "${CIRCLE_SHA1}" \
+                -b "ToDo version ${CIRCLE_TAG}" \
+                -delete "${CIRCLE_TAG}" \
+                /tmp/artifacts
+
+workflows:
+  version: 2
+  # The basic CI workflow for single commits and opened PRs.
+  todo-ci:
+    jobs:
+      - go-checks
+      - go-test:
+          requires:
+            - go-checks
+  # The workflow for delivering the application.
+  todo-cd:
+    jobs:
+      - build:
+          requires:
+            - pre-release-check
+          filters:
+            tags:
+              only: /v.*/
+      - release-github:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /v.*/
