@@ -2,7 +2,14 @@
 package core
 
 import (
+	"errors"
+
 	"github.com/dominikbraun/todo/model"
+)
+
+var (
+	// ErrNameMustNotBeEmpty indicates that a ToDo or task name is empty.
+	ErrNameMustNotBeEmpty = errors.New("name must not be empty")
 )
 
 // App represents the core application. At this time, it merely consists of an
@@ -20,6 +27,16 @@ func NewApp(storage Storage) *App {
 
 // CreateToDo creates a new ToDo item. The provided item should not have an ID.
 func (a *App) CreateToDo(toDo model.ToDo) (model.ToDo, error) {
+	if toDo.Name == "" {
+		return model.ToDo{}, ErrNameMustNotBeEmpty
+	}
+
+	for _, task := range toDo.Tasks {
+		if task.Name == "" {
+			return model.ToDo{}, ErrNameMustNotBeEmpty
+		}
+	}
+
 	return a.storage.CreateToDo(toDo)
 }
 
@@ -36,6 +53,16 @@ func (a *App) GetToDo(id int64) (model.ToDo, error) {
 // UpdateToDo updates a ToDo item by replacing the stored item with the given ID
 // with the provided item.
 func (a *App) UpdateToDo(id int64, toDo model.ToDo) error {
+	if toDo.Name == "" {
+		return ErrNameMustNotBeEmpty
+	}
+
+	for _, task := range toDo.Tasks {
+		if task.Name == "" {
+			return ErrNameMustNotBeEmpty
+		}
+	}
+
 	return a.storage.UpdateToDo(id, toDo)
 }
 

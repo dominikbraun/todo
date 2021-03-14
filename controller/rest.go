@@ -45,7 +45,11 @@ func (r *RESTController) CreateToDo() http.HandlerFunc {
 		}
 
 		createdToDo, err := r.app.CreateToDo(toDo)
-		if err != nil {
+
+		if errors.Is(err, core.ErrNameMustNotBeEmpty) {
+			respond(writer, request, http.StatusUnprocessableEntity, err)
+			return
+		} else if err != nil {
 			respond(writer, request, http.StatusInternalServerError, err)
 			return
 		}
@@ -79,12 +83,12 @@ func (r *RESTController) GetToDo() http.HandlerFunc {
 		}
 
 		toDo, err := r.app.GetToDo(int64(id))
-		if err != nil {
-			status := http.StatusInternalServerError
-			if errors.Is(err, core.ErrToDoNotFound) {
-				status = http.StatusNotFound
-			}
-			respond(writer, request, status, err)
+
+		if errors.Is(err, core.ErrToDoNotFound) {
+			respond(writer, request, http.StatusNotFound, err)
+			return
+		} else if err != nil {
+			respond(writer, request, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -112,12 +116,15 @@ func (r *RESTController) UpdateToDo() http.HandlerFunc {
 		}
 
 		err = r.app.UpdateToDo(int64(id), toDo)
-		if err != nil {
-			status := http.StatusInternalServerError
-			if errors.Is(err, core.ErrToDoNotFound) {
-				status = http.StatusNotFound
-			}
-			respond(writer, request, status, err)
+
+		if errors.Is(err, core.ErrToDoNotFound) {
+			respond(writer, request, http.StatusNotFound, err)
+			return
+		} else if errors.Is(err, core.ErrNameMustNotBeEmpty) {
+			respond(writer, request, http.StatusUnprocessableEntity, err)
+			return
+		} else if err != nil {
+			respond(writer, request, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -137,12 +144,9 @@ func (r *RESTController) DeleteToDo() http.HandlerFunc {
 			return
 		}
 
-		if err := r.app.DeleteToDo(int64(id)); err != nil {
-			status := http.StatusInternalServerError
-			if errors.Is(err, core.ErrToDoNotFound) {
-				status = http.StatusNotFound
-			}
-			respond(writer, request, status, err)
+		err = r.app.DeleteToDo(int64(id))
+		if err != nil {
+			respond(writer, request, http.StatusInternalServerError, err)
 			return
 		}
 
