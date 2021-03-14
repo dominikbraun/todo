@@ -4,6 +4,7 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/dominikbraun/todo/storage"
 	"net/http"
 	"strconv"
 
@@ -159,7 +160,7 @@ func respond(writer http.ResponseWriter, request *http.Request, status int, v in
 // statusCodeForError returns an appropriate HTTP status code for a given error.
 func statusCodeForError(err error) int {
 	statusCodes := map[error]int{
-		core.ErrToDoNotFound:       http.StatusNotFound,
+		storage.ErrToDoNotFound:    http.StatusNotFound,
 		core.ErrNameMustNotBeEmpty: http.StatusUnprocessableEntity,
 		nil:                        http.StatusOK,
 	}
