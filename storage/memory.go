@@ -1,8 +1,7 @@
-// Package storage provides implementations of the core.Storage interface.
+// Package storage provides a generic storage interface and its implementations.
 package storage
 
 import (
-	"github.com/dominikbraun/todo/core"
 	"github.com/dominikbraun/todo/model"
 )
 
@@ -62,17 +61,17 @@ func (m *memory) FindToDos() ([]model.ToDo, error) {
 }
 
 // FindToDoByID looks for a ToDo item with the provided ID and returns that item
-// if it was found. Otherwise, core.ErrToDoNotFound will be returned.
+// if it was found. Otherwise, ErrToDoNotFound will be returned.
 func (m *memory) FindToDoByID(id int64) (model.ToDo, error) {
 	if toDo, exists := m.internal[id]; exists {
 		return toDo, nil
 	}
 
-	return model.ToDo{}, core.ErrToDoNotFound
+	return model.ToDo{}, ErrToDoNotFound
 }
 
 // UpdateToDo overwrites a stored ToDo item with the provided ToDo instance. If
-// the requested ToDo cannot be found, core.ErrToDoNotFound will be returned.
+// the requested ToDo cannot be found, ErrToDoNotFound will be returned.
 //
 // Just like mariaDB.UpdateToDo, this function makes sure that IDs of existing
 // tasks will not change: If a task has no ID assigned, it is considered to be
@@ -80,7 +79,7 @@ func (m *memory) FindToDoByID(id int64) (model.ToDo, error) {
 // modified or removed, will be overridden with the tasks of the new ToDo item.
 func (m *memory) UpdateToDo(id int64, toDo model.ToDo) error {
 	if _, exists := m.internal[id]; !exists {
-		return core.ErrToDoNotFound
+		return ErrToDoNotFound
 	}
 
 	for i, task := range toDo.Tasks {
@@ -96,10 +95,10 @@ func (m *memory) UpdateToDo(id int64, toDo model.ToDo) error {
 }
 
 // DeleteToDo deletes the ToDo item with the given ID. If the ToDo item cannot
-// be found, core.ErrToDoNotFound will be returned.
+// be found, ErrToDoNotFound will be returned.
 func (m *memory) DeleteToDo(id int64) error {
 	if _, exists := m.internal[id]; !exists {
-		return core.ErrToDoNotFound
+		return ErrToDoNotFound
 	}
 	delete(m.internal, id)
 	return nil

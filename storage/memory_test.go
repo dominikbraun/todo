@@ -1,4 +1,4 @@
-// Package storage provides implementations of the core.Storage interface.
+// Package storage provides a generic storage interface and its implementations.
 package storage
 
 import (

@@ -1,5 +1,5 @@
-// Package core provides the core application functionality and business logic.
-package core
+// Package storage provides a generic storage interface and its implementations.
+package storage
 
 import (
 	"errors"
