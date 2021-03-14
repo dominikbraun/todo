@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/dominikbraun/todo/model"
+	"github.com/dominikbraun/todo/storage"
 )
 
 var (
@@ -15,11 +16,11 @@ var (
 // App represents the core application. At this time, it merely consists of an
 // arbitrary storage.Storage implementation for accessing ToDo items.
 type App struct {
-	storage Storage
+	storage storage.Storage
 }
 
 // NewApp creates a new App instance that persists data to the given storage.
-func NewApp(storage Storage) *App {
+func NewApp(storage storage.Storage) *App {
 	return &App{
 		storage: storage,
 	}
