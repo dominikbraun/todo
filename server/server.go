@@ -26,7 +26,7 @@ type Server struct {
 
 // New creates a server that uses the given app instance to handle requests.
 func New(port uint, app *core.App) *Server {
-	address := fmt.Sprintf(":%v", port)
+	address := fmt.Sprintf("0.0.0.0:%v", port)
 
 	server := &Server{
 		internal:   &http.Server{Addr: address},
