@@ -50,6 +50,7 @@ func parseApplicationConfig() config {
 	pflag.String("mariadb-user", "admin", "The MariaDB user")
 	pflag.String("mariadb-password", "admin", "The MariaDB password")
 	pflag.String("mariadb-address", "localhost:3306", "The MariaDB address")
+	pflag.String("mariadb-dbname", "todo_app", "The MariaDB database name")
 	pflag.Uint("port", 8000, "The port the server should listen on")
 
 	pflag.Parse()
@@ -65,6 +66,7 @@ func parseApplicationConfig() config {
 			User:     viper.GetString("mariadb-user"),
 			Password: viper.GetString("mariadb-password"),
 			Address:  viper.GetString("mariadb-address"),
+			DBName:   viper.GetString("mariadb-dbname"),
 		},
 		serverPort: viper.GetUint("port"),
 	}

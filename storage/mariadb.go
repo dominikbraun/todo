@@ -16,6 +16,7 @@ type MariaDBConfig struct {
 	User     string
 	Password string
 	Address  string
+	DBName   string
 }
 
 // URI yields a connection string in the form <user>:<password>@<host>:<port>/.
@@ -48,7 +49,7 @@ func NewMariaDB(config MariaDBConfig) (*mariaDB, error) {
 func (m *mariaDB) connect() error {
 	uri := m.config.URI()
 	if m.isInitialized {
-		uri = uri + "todo_app"
+		uri = uri + m.config.DBName
 	}
 
 	db, err := sqlx.Connect("mysql", uri)
@@ -63,8 +64,8 @@ func (m *mariaDB) connect() error {
 // Initialize creates the MariaDB database and tables if they don't exist yet.
 func (m *mariaDB) Initialize() error {
 	statements := []string{
-		`CREATE DATABASE IF NOT EXISTS todo_app`,
-		`USE todo_app`,
+		`CREATE DATABASE IF NOT EXISTS ` + m.config.DBName,
+		`USE ` + m.config.DBName,
 		`CREATE TABLE IF NOT EXISTS todos (
 			id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 			name VARCHAR(100) NOT NULL,
