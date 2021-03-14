@@ -3,11 +3,11 @@ module github.com/dominikbraun/todo
 go 1.15
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/render v1.0.1
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/google/go-cmp v0.3.0
 	github.com/jmoiron/sqlx v1.3.1
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.3
