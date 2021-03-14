@@ -4,7 +4,6 @@ package controller
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"strconv"
 
@@ -45,12 +44,8 @@ func (r *RESTController) CreateToDo() http.HandlerFunc {
 		}
 
 		createdToDo, err := r.app.CreateToDo(toDo)
-
-		if errors.Is(err, core.ErrNameMustNotBeEmpty) {
-			respond(writer, request, http.StatusUnprocessableEntity, err)
-			return
-		} else if err != nil {
-			respond(writer, request, http.StatusInternalServerError, err)
+		if err != nil {
+			respond(writer, request, statusCodeForError(err), err)
 			return
 		}
 
@@ -63,7 +58,7 @@ func (r *RESTController) GetToDos() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		toDos, err := r.app.GetToDos()
 		if err != nil {
-			respond(writer, request, http.StatusInternalServerError, err)
+			respond(writer, request, statusCodeForError(err), err)
 			return
 		}
 
@@ -78,17 +73,13 @@ func (r *RESTController) GetToDo() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(request, "id"))
 		if err != nil {
-			respond(writer, request, http.StatusBadRequest, err)
+			respond(writer, request, statusCodeForError(err), err)
 			return
 		}
 
 		toDo, err := r.app.GetToDo(int64(id))
-
-		if errors.Is(err, core.ErrToDoNotFound) {
-			respond(writer, request, http.StatusNotFound, err)
-			return
-		} else if err != nil {
-			respond(writer, request, http.StatusInternalServerError, err)
+		if err != nil {
+			respond(writer, request, statusCodeForError(err), err)
 			return
 		}
 
@@ -104,7 +95,7 @@ func (r *RESTController) UpdateToDo() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(request, "id"))
 		if err != nil {
-			respond(writer, request, http.StatusBadRequest, err)
+			respond(writer, request, statusCodeForError(err), err)
 			return
 		}
 
@@ -116,15 +107,8 @@ func (r *RESTController) UpdateToDo() http.HandlerFunc {
 		}
 
 		err = r.app.UpdateToDo(int64(id), toDo)
-
-		if errors.Is(err, core.ErrToDoNotFound) {
-			respond(writer, request, http.StatusNotFound, err)
-			return
-		} else if errors.Is(err, core.ErrNameMustNotBeEmpty) {
-			respond(writer, request, http.StatusUnprocessableEntity, err)
-			return
-		} else if err != nil {
-			respond(writer, request, http.StatusInternalServerError, err)
+		if err != nil {
+			respond(writer, request, statusCodeForError(err), err)
 			return
 		}
 
@@ -140,13 +124,13 @@ func (r *RESTController) DeleteToDo() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(request, "id"))
 		if err != nil {
-			respond(writer, request, http.StatusBadRequest, err)
+			respond(writer, request, statusCodeForError(err), err)
 			return
 		}
 
 		err = r.app.DeleteToDo(int64(id))
 		if err != nil {
-			respond(writer, request, http.StatusInternalServerError, err)
+			respond(writer, request, statusCodeForError(err), err)
 			return
 		}
 
@@ -170,4 +154,22 @@ func respond(writer http.ResponseWriter, request *http.Request, status int, v in
 	if response != nil {
 		render.JSON(writer, request, response)
 	}
+}
+
+// statusCodeForError returns an appropriate HTTP status code for a given error.
+func statusCodeForError(err error) int {
+	statusCodes := map[error]int{
+		core.ErrToDoNotFound:       http.StatusNotFound,
+		core.ErrNameMustNotBeEmpty: http.StatusUnprocessableEntity,
+		nil:                        http.StatusOK,
+	}
+
+	statusCode, isRegistered := statusCodes[err]
+
+	// Return status 500 for all errors that are not registered and not nil.
+	if !isRegistered {
+		return http.StatusInternalServerError
+	}
+
+	return statusCode
 }
