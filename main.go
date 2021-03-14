@@ -49,7 +49,7 @@ func parseApplicationConfig() config {
 
 	pflag.String("mariadb-user", "admin", "The MariaDB user")
 	pflag.String("mariadb-password", "admin", "The MariaDB password")
-	pflag.String("mariadb-address", "localhost:3306", "The MariaDB address")
+	pflag.String("mariadb-address", "0.0.0.0:3306", "The MariaDB address")
 	pflag.String("mariadb-dbname", "todo_app", "The MariaDB database name")
 	pflag.Uint("port", 8000, "The port the server should listen on")
 
