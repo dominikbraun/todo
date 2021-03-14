@@ -195,6 +195,10 @@ func (m *mariaDB) FindToDoByID(id int64) (model.ToDo, error) {
 // For the sake of simplicity, tasks will be updated regardless whether they
 // actually changed.
 func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
+	if _, err := m.FindToDoByID(id); err != nil {
+		return err
+	}
+
 	taskIDs := make([]int64, 0)
 
 	for _, task := range toDo.Tasks {
@@ -266,7 +270,6 @@ func (m *mariaDB) UpdateToDo(id int64, toDo model.ToDo) error {
 // DeleteToDo deletes the ToDo item with the given ID. If the ToDo item cannot
 // be found, core.ErrToDoNotFound will be returned.
 func (m *mariaDB) DeleteToDo(id int64) error {
-	// Return a possible core.ErrToDoNotFound error if the ToDo doesn't exist.
 	if _, err := m.FindToDoByID(id); err != nil {
 		return err
 	}
