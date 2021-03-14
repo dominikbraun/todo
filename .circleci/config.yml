@@ -128,8 +128,6 @@ workflows:
   todo-cd:
     jobs:
       - build:
-          requires:
-            - pre-release-check
           filters:
             tags:
               only: /v.*/
