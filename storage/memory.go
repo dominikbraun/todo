@@ -103,3 +103,17 @@ func (m *memory) DeleteToDo(id int64) error {
 	delete(m.internal, id)
 	return nil
 }
+
+// Remove removes the in-memory storage by setting its hash map to nil.
+func (m *memory) Remove() error {
+	m.internal = nil
+	m.toDoID = 0
+	m.taskID = 0
+
+	return nil
+}
+
+// Close implements Storage.Close. There are no resources to close.
+func (m *memory) Close() error {
+	return nil
+}

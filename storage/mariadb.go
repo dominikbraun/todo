@@ -342,3 +342,19 @@ func (m *mariaDB) findTasksByToDoID(toDoID int64) ([]model.Task, error) {
 
 	return tasks, nil
 }
+
+// Remove drops the configured MariaDB database along with its tables.
+func (m *mariaDB) Remove() error {
+	sql := `DROP DATABASE ` + m.config.DBName
+
+	if _, err := m.db.Exec(sql); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Close attempts to close the database connection.
+func (m *mariaDB) Close() error {
+	return m.db.Close()
+}

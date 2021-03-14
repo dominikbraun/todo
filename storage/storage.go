@@ -39,4 +39,11 @@ type Storage interface {
 	// DeleteToDo deletes the ToDo item with the given ID. In case the item
 	// cannot be found, an error will be returned.
 	DeleteToDo(id int64) error
+
+	// Remove removes the storage. It is the inverse operation of Initialize.
+	// Must be called before Close when wiping a storage.
+	Remove() error
+
+	// Close closes handles and other resources like database connections.
+	Close() error
 }
