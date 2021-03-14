@@ -4,12 +4,12 @@ package controller
 
 import (
 	"encoding/json"
-	"github.com/dominikbraun/todo/storage"
 	"net/http"
 	"strconv"
 
 	"github.com/dominikbraun/todo/core"
 	"github.com/dominikbraun/todo/model"
+	"github.com/dominikbraun/todo/storage"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
