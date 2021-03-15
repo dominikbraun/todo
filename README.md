@@ -40,9 +40,9 @@ The REST API is exposed on `localost:8000`.
 
 ### Configuration
 
-The example above uses `test123` as MariaDB root password. However, all MariaDB
-settings and other parameters can be configured exactly to your needs. These are
-the configuration values available:
+The example above uses `test123` as MariaDB root password. However, the access
+to MariaDB and other parameters can be configured exactly to your needs. These
+are the configuration values available:
 
 |Configuration Value|Default|Environment Variable|CLI Flag|
 |-|-|-|-|
@@ -76,4 +76,13 @@ The API expects and returns ToDo items looking as follows:
 ```
 
 The `ID` fields have to be empty when the respective item doesn't exist yet,
-e.g. when calling `POST /todos`. 
+e.g. when calling `POST /todos`.
+
+### Endpoints
+
+|Method|Route|Description|Expected Body|
+|POST|`/todos`|Creates a new ToDo|A ToDo item without ID|
+|GET|`/todos`|Returns a list of all ToDos|-|
+|GET|`/todos/{id}`|Returns a ToDo|-|
+|PUT|`/todos/{id}`|Overwrites an existing Todo|An updated ToDo item|
+|DELETE|`/todos/{id}`|Deletes a ToDo|-|
