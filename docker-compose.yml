@@ -11,11 +11,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
     restart: always
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      interval: 4s
-      timeout: 4s
-      retries: 5
 
   # The app service waits for MariaDB and exposes its API on port 8000.
   # This example uses environment variables for configuring MariaDB access,
@@ -26,10 +21,8 @@ services:
       context: .
     ports:
       - 8000:8000
-    depends_on:
-      mariadb:
-        condition: service_healthy
     environment:
       TODO_MARIADB_USER: root
       TODO_MARIADB_PASSWORD: root
       TODO_MARIADB_ADDRESS: mariadb:3306
+      WAIT_HOSTS: mariadb:3306
