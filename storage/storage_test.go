@@ -69,9 +69,11 @@ func TestStorage(t *testing.T) {
 		testDeleteToDo,
 	}
 
-	for _, storage := range storages {
+	for name, storage := range storages {
 		for _, test := range tests {
-			test(t, storage)
+			t.Run(name, func(t *testing.T) {
+				test(t, storage)
+			})
 		}
 	}
 

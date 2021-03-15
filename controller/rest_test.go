@@ -1,5 +1,5 @@
 // Package controller provides application controllers that convert incoming
-// data to domain models, run business logic on them and return the results.
+// requests to domain models, run business logic on them and return the results.
 package controller
 
 import (

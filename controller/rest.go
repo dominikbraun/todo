@@ -1,5 +1,5 @@
 // Package controller provides application controllers that convert incoming
-// data to domain models, run business logic on them and return the results.
+// requests to domain models, run business logic on them and return the results.
 package controller
 
 import (
@@ -19,14 +19,14 @@ type errorResponse struct {
 	Error string `json:"error"`
 }
 
-// RESTController represents a controller capable of handling incoming HTTP
-// requests and yielding a corresponding JSON result.
+// RESTController represents a controller capable of handling HTTP requests and
+// yielding a corresponding JSON result.
 type RESTController struct {
 	app *core.App
 }
 
 // NewRESTController returns a new REST controller instance that will use the
-// provided app instance for triggering business logic.
+// provided app instance for running business logic.
 func NewRESTController(app *core.App) *RESTController {
 	return &RESTController{
 		app: app,
@@ -167,8 +167,8 @@ func statusCodeForError(err error) int {
 
 	statusCode, isRegistered := statusCodes[err]
 
-	// Return status 500 for all errors that are not registered and not nil.
-	if !isRegistered {
+	// Return status 500 for all errors that are not nil and not registered.
+	if err != nil && !isRegistered {
 		return http.StatusInternalServerError
 	}
 
