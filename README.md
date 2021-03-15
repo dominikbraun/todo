@@ -81,6 +81,7 @@ e.g. when calling `POST /todos`.
 ### Endpoints
 
 |Method|Route|Description|Expected Body|
+|-|-|-|-|
 |POST|`/todos`|Creates a new ToDo|A ToDo item without ID|
 |GET|`/todos`|Returns a list of all ToDos|-|
 |GET|`/todos/{id}`|Returns a ToDo|-|
