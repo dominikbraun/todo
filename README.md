@@ -26,14 +26,14 @@ First, get a MariaDB server with administrator permissions up and running. If
 you don't have MariaDB installed locally, just launch a Docker container:
 
 ```
-$ docker container run -p 3306:3306 mariadb -e MYSQL_ROOT_PASSWORD test123
+$ docker container run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=test123 mariadb
 ```
 
 Once MariaDB is running, use `go run` to compile and run the application. Make
-sure to pass the correct MariaDB password. 
+sure to pass the correct MariaDB credentials.
 
 ```
-$ go run . --mariadb-password test123
+$ go run . --mariadb-user root --mariadb-password test123
 ```
 
 The REST API is exposed on `localost:8000`.

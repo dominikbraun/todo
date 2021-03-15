@@ -35,6 +35,8 @@ func main() {
 	app := core.NewApp(mariaDB)
 	srv := server.New(flags.serverPort, app)
 
+	log.Printf("serving app on port %d\n", flags.serverPort)
+
 	if err := srv.Run(); err != nil {
 		log.Fatal(err)
 	}
